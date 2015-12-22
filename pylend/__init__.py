@@ -3,3 +3,4 @@ from .exceptions import (AuthorizationException,
                          ResourceNotFoundException,
                          ExecutionFailureException,
                          UnexpectedStatusCodeException)
+from .loans import Loans

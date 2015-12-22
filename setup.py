@@ -9,7 +9,8 @@ setup(name='pylend',
       license='MIT',
       packages=['pylend'],
       install_requires=[
-        'requests'
+        'requests',
+        'arrow'
       ],
       zip_safe=False,
       test_suite='nose.collector',

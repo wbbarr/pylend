@@ -86,3 +86,7 @@ class ConnectionTest(TestCase):
         c = LendingClub_Connection(api_key="testkey")
 
         c.get("foo")
+
+    def passing_None_for_api_key_raises_exception_test(self):
+        with self.assertRaises(ValueError):
+            LendingClub_Connection(api_key=None)

@@ -18,6 +18,8 @@ class LendingClub_Connection:
     __LENDINGCLUB_BASE_URI = 'https://api.lendingclub.com/api/investor/{0}/{1}'
 
     def __init__(self, api_key, request_delay=timedelta(seconds=1.0)):
+        if api_key is None:
+            raise ValueError('api_key must be provided and not None.')
         self.__api_key = api_key
         self.__last_request = datetime.min
         self.__request_delay = request_delay
