@@ -1,8 +1,9 @@
 import logging
 import arrow
+import pylend
 from .exceptions import ExecutionFailureException
 
-CONVERTABLE_DATETIME_FIELDS = \
+LOAN_DATETIME_FIELDS = \
     [
         'ilsExpD',
         'earliestCrLine',
@@ -14,16 +15,11 @@ CONVERTABLE_DATETIME_FIELDS = \
     ]
 
 
-def _convert_datetimes(loan):
-    for field in CONVERTABLE_DATETIME_FIELDS:
-        loan[field] = arrow.get(loan[field])
-    return loan
-
-
 def _normalize_loan_format(json_payload):
         json_payload['asOfDate'] = arrow.get(json_payload['asOfDate'])
-        json_payload['loans'] = \
-            [_convert_datetimes(loan) for loan in json_payload['loans']]
+        json_payload['loans'] = [pylend._convert_datetimes(
+            loan,
+            LOAN_DATETIME_FIELDS) for loan in json_payload['loans']]
         return json_payload
 
 
@@ -37,7 +33,7 @@ class Loans:
         self.__connection = connection
         self.__logger = logging.getLogger('pylend')
 
-    def get_listed_loans(self, get_all_loans=False):
+    def listed_loans(self, get_all_loans=False):
         url_path = 'loans/listing'
         query_params = {'showAll': get_all_loans}
         self.__logger.debug('Retrieving path {0} with query_params {1}'

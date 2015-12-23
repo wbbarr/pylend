@@ -1,6 +1,6 @@
 from unittest import TestCase
 from unittest.mock import patch
-from pylend import LendingClub_Connection
+from pylend import Connection
 from requests import Response
 from pylend import (AuthorizationException,
                     ResourceNotFoundException,
@@ -26,7 +26,7 @@ class ConnectionTest(TestCase):
         response = Response()
         response.status_code = 401
         requests_get_patch.return_value = response
-        c = LendingClub_Connection(api_key="testkey")
+        c = Connection(api_key="testkey")
 
         with self.assertRaises(AuthorizationException):
             c.get("foo")
@@ -34,7 +34,7 @@ class ConnectionTest(TestCase):
         response = Response()
         response.status_code = 403
         requests_get_patch.return_value = response
-        c = LendingClub_Connection(api_key="testkey")
+        c = Connection(api_key="testkey")
 
         with self.assertRaises(AuthorizationException):
             c.get("foo")
@@ -47,7 +47,7 @@ class ConnectionTest(TestCase):
         response = Response()
         response.status_code = 500
         requests_get_patch.return_value = response
-        c = LendingClub_Connection(api_key="testkey")
+        c = Connection(api_key="testkey")
 
         with self.assertRaises(ExecutionFailureException):
             c.get("foo")
@@ -60,7 +60,7 @@ class ConnectionTest(TestCase):
         response = Response()
         response.status_code = 404
         requests_get_patch.return_value = response
-        c = LendingClub_Connection(api_key="testkey")
+        c = Connection(api_key="testkey")
 
         with self.assertRaises(ResourceNotFoundException):
             c.get("foo")
@@ -72,7 +72,7 @@ class ConnectionTest(TestCase):
 
         response = MockResponse('foo', 200, '')
         requests_get_patch.return_value = response
-        c = LendingClub_Connection(api_key="testkey")
+        c = Connection(api_key="testkey")
 
         c.get("foo")
 
@@ -83,10 +83,10 @@ class ConnectionTest(TestCase):
 
         response = MockResponse('foo', 400, '')
         requests_get_patch.return_value = response
-        c = LendingClub_Connection(api_key="testkey")
+        c = Connection(api_key="testkey")
 
         c.get("foo")
 
     def passing_None_for_api_key_raises_exception_test(self):
         with self.assertRaises(ValueError):
-            LendingClub_Connection(api_key=None)
+            Connection(api_key=None)

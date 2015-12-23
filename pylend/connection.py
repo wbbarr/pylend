@@ -8,7 +8,7 @@ from .exceptions import (AuthorizationException,
                          UnexpectedStatusCodeException)
 
 
-class LendingClub_Connection:
+class Connection:
     __api_key = None
     __last_request = None
     __logger = None
@@ -38,7 +38,7 @@ class LendingClub_Connection:
                                 headers=headers,
                                 params=query_params)
         self.__last_request = datetime.now()
-        self.__logger.debug('URI for get request: {0}'.format(response.url))
+        self.__logger.info('URI for get request: {0}'.format(response.url))
         self._check_for_errors(response)
         return response.json()
 

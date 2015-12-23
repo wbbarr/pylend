@@ -128,10 +128,10 @@ class LoanTest(TestCase):
         connection = MockConnection(callback)
         l = Loans(connection)
 
-        l.get_listed_loans()
-        l.get_listed_loans(get_all_loans=False)
+        l.listed_loans()
+        l.listed_loans(get_all_loans=False)
         showAllValue = True
-        l.get_listed_loans(get_all_loans=True)
+        l.listed_loans(get_all_loans=True)
 
     def json_with_error_block_raises_exception_test(self):
 
@@ -141,7 +141,7 @@ class LoanTest(TestCase):
         l = Loans(connection)
 
         with self.assertRaises(ExecutionFailureException):
-            l.get_listed_loans()
+            l.listed_loans()
 
     def verify_asOfDate_datetime_converted_test(self):
 
@@ -151,7 +151,7 @@ class LoanTest(TestCase):
         connection = MockConnection(callback)
         l = Loans(connection)
 
-        result = l.get_listed_loans()
+        result = l.listed_loans()
 
         self.assertEqual(arrow.get("2014-09-03T14:41:53.959-07:00"),
                          result['asOfDate'])
@@ -173,7 +173,7 @@ class LoanTest(TestCase):
         connection = MockConnection(callback)
         l = Loans(connection)
 
-        loan = l.get_listed_loans()['loans'][0]
+        loan = l.listed_loans()['loans'][0]
 
         for date in dates:
             self.assertEqual(dates[date], loan[date])
