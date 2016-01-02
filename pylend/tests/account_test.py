@@ -96,7 +96,7 @@ class PendingTransfersTest(TestCase):
 
         result = a.pending_transfers()
 
-        self.assertIsNone(result['transfers'][0]['endDate'])
+        self.assertIsNone(result[0]['endDate'])
 
     def frequencies_are_converted_test(self):
         def callback(resource, api_version, query_params):
@@ -106,9 +106,20 @@ class PendingTransfersTest(TestCase):
 
         result = a.pending_transfers()
 
-        self.assertEquals("LOAD_ONCE", result['transfers'][0]['frequency'])
+        self.assertEquals("LOAD_ONCE", result[0]['frequency'])
         self.assertEquals("LOAD_ON_DAY_1_AND_16",
-                          result['transfers'][3]['frequency'])
+                          result[3]['frequency'])
+
+    def no_transfers_returns_empty_list_test(self):
+        def callback(resource, api_version, query_params):
+            return json.loads('{}')
+        connection = MockConnection(callback)
+        a = Account(connection, 1)
+
+        result = a.pending_transfers()
+
+        self.assertEquals(list, type(result))
+        self.assertEquals(0, len(result))
 
 
 class OwnedNotesTest(TestCase):
@@ -166,7 +177,7 @@ class OwnedNotesTest(TestCase):
         result = a.owned_notes()
         self.assertEquals(
             arrow.get("2009-11-12T06:34:02.000-08:00"),
-            result['myNotes'][0]['issueDate'])
+            result[0]['issueDate'])
 
     def detailed_info_requests_data_from_detailednotes_test(self):
         def callback(resource, api_version, query_params):
@@ -176,6 +187,17 @@ class OwnedNotesTest(TestCase):
         a = Account(connection, 1)
 
         a.owned_notes(detailed_info=True)
+
+    def no_notes_returns_empty_list_test(self):
+        def callback(resource, api_version, query_params):
+            return json.loads('{}')
+        connection = MockConnection(callback)
+        a = Account(connection, 1)
+
+        result = a.owned_notes()
+
+        self.assertEquals(list, type(result))
+        self.assertEquals(0, len(result))
 
 
 class PortfoliosTest(TestCase):
@@ -201,3 +223,14 @@ class PortfoliosTest(TestCase):
         a = Account(connection, 1)
 
         a.portfolios()
+
+    def no_portfolios_returns_empty_list_test(self):
+        def callback(resource, api_version, query_params):
+            return json.loads('{}')
+        connection = MockConnection(callback)
+        a = Account(connection, 1)
+
+        result = a.portfolios()
+
+        self.assertEquals(list, type(result))
+        self.assertEquals(0, len(result))

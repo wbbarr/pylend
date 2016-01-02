@@ -75,7 +75,8 @@ class Account:
         return _normalize_received_json(
             json_payload,
             'transfers',
-            _normalize_transfer)
+            _normalize_transfer)['transfers'] \
+            if 'transfers' in json_payload else []
 
     def owned_notes(self, detailed_info=False):
         resource = 'notes'
@@ -86,10 +87,12 @@ class Account:
         return _normalize_received_json(
             json_payload,
             'myNotes',
-            _normalize_notes)
+            _normalize_notes)['myNotes'] if 'myNotes' in json_payload else []
 
     def portfolios(self):
-        return self._account_resource_get('portfolios')
+        json_payload = self._account_resource_get('portfolios')
+        return json_payload['myPortfolios'] \
+            if 'myPortfolios' in json_payload else []
 
     def _check_for_errors(self, json_payload):
         if 'errors' in json_payload:
