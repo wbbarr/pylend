@@ -8,6 +8,14 @@ TRANSFER_DATETIME_FIELDS = \
         'endDate'
     ]
 
+NOTE_DATETIME_FIELDS = \
+    [
+        'loanStatusDate',
+        'orderDate',
+        'issueDate',
+        'nextPaymentDate'
+    ]
+
 TRANSFER_FREQUENCY_MAPPING = \
     {
         "One Time": "LOAD_ONCE",
@@ -18,18 +26,24 @@ TRANSFER_FREQUENCY_MAPPING = \
     }
 
 
-def _normalize_received_transfers(json_payload):
+def _normalize_transfer(transfer):
+    transfer = pylend._convert_datetimes(
+        transfer,
+        TRANSFER_DATETIME_FIELDS)
+    transfer['frequency'] = TRANSFER_FREQUENCY_MAPPING[
+        transfer['frequency']]
+    return transfer
 
-    def normalize_transfer(transfer):
-        transfer = pylend._convert_datetimes(
-            transfer,
-            TRANSFER_DATETIME_FIELDS)
-        transfer['frequency'] = TRANSFER_FREQUENCY_MAPPING[
-            transfer['frequency']]
-        return transfer
 
-    json_payload['transfers'] = [
-        normalize_transfer(transfer) for transfer in json_payload['transfers']]
+def _normalize_notes(note):
+    return pylend._convert_datetimes(
+        note,
+        NOTE_DATETIME_FIELDS)
+
+
+def _normalize_received_json(json_payload, dictionary_key, normalizer):
+    json_payload[dictionary_key] = [
+        normalizer(transfer) for transfer in json_payload[dictionary_key]]
     return json_payload
 
 
@@ -58,11 +72,28 @@ class Account:
 
     def pending_transfers(self):
         json_payload = self._account_resource_get('funds/pending')
-        return _normalize_received_transfers(json_payload)
+        return _normalize_received_json(
+            json_payload,
+            'transfers',
+            _normalize_transfer)
+
+    def owned_notes(self, detailed_info=False):
+        resource = 'notes'
+        if detailed_info:
+            resource = 'detailednotes'
+
+        json_payload = self._account_resource_get(resource)
+        return _normalize_received_json(
+            json_payload,
+            'myNotes',
+            _normalize_notes)
+
+    def portfolios(self):
+        return self._account_resource_get('portfolios')
 
     def _check_for_errors(self, json_payload):
         if 'errors' in json_payload:
-            self.__logger.error('Listed loan has errors: {0}'
+            self.__logger.error('Account resource request has errors: {0}'
                                 .format(json_payload['errors']))
             raise ExecutionFailureException()
 

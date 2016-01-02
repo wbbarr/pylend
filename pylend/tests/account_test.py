@@ -1,3 +1,4 @@
+import arrow
 import json
 from .mock_connection import MockConnection
 from unittest import TestCase
@@ -108,3 +109,95 @@ class PendingTransfersTest(TestCase):
         self.assertEquals("LOAD_ONCE", result['transfers'][0]['frequency'])
         self.assertEquals("LOAD_ON_DAY_1_AND_16",
                           result['transfers'][3]['frequency'])
+
+
+class OwnedNotesTest(TestCase):
+    __VALID_RESULT = """
+{
+    "myNotes" : [
+    {
+        "loanId":11111,
+        "noteId":22222,
+        "orderId":33333,
+        "interestRate":13.57,
+        "loanLength":36,
+        "loanStatus":"Late (31-120 days)",
+        "grade":"C",
+        "loanAmount":10800,
+        "noteAmount":25,
+        "paymentsReceived":5.88,
+        "issueDate":"2009-11-12T06:34:02.000-08:00",
+        "orderDate":"2009-11-05T09:33:50.000-08:00",
+        "loanStatusDate":"2013-05-20T13:13:53.000-07:00"
+    },
+    {
+        "loanId":44444,
+        "noteId":55555,
+        "orderId":66666,
+        "interestRate":14.26,
+        "loanLength":36,
+        "loanStatus":"Late (31-120 days)",
+        "grade":"C",
+        "loanAmount":3000,
+        "noteAmount":25,
+        "paymentsReceived":7.65,
+        "issueDate":"2009-09-18T01:04:34.000-07:00",
+        "orderDate":"2009-09-15T11:28:12.000-07:00",
+        "loanStatusDate":"2013-05-23T17:27:51.000-07:00"
+    }
+    ]
+}
+    """
+
+    def valid_result_raises_no_exceptions_test(self):
+        def callback(resource, api_version, query_params):
+            return json.loads(self.__VALID_RESULT)
+        connection = MockConnection(callback)
+        a = Account(connection, 1)
+
+        a.owned_notes()
+
+    def dates_are_converted_test(self):
+        def callback(resource, api_version, query_params):
+            return json.loads(self.__VALID_RESULT)
+        connection = MockConnection(callback)
+        a = Account(connection, 1)
+
+        result = a.owned_notes()
+        self.assertEquals(
+            arrow.get("2009-11-12T06:34:02.000-08:00"),
+            result['myNotes'][0]['issueDate'])
+
+    def detailed_info_requests_data_from_detailednotes_test(self):
+        def callback(resource, api_version, query_params):
+            self.assertEquals('accounts/1/detailednotes', resource)
+            return json.loads(self.__VALID_RESULT)
+        connection = MockConnection(callback)
+        a = Account(connection, 1)
+
+        a.owned_notes(detailed_info=True)
+
+
+class PortfoliosTest(TestCase):
+    __VALID_RESULT = """
+{
+    "myPortfolios":[
+    {
+        "portfolioId":11111,
+        "portfolioName":"Portfolio1",
+        "portfolioDescription":"Sample Portfolio Description"},
+    {
+        "portfolioId":22222,
+        "portfolioName":"Portfolio2",
+        "portfolioDescription":null
+    }]
+}
+    """
+
+    def valid_result_raises_no_exceptions_test(self):
+        def callback(resource, api_version, query_params):
+            return json.loads(self.__VALID_RESULT)
+        connection = MockConnection(callback)
+        a = Account(connection, 1)
+
+        a.portfolios()

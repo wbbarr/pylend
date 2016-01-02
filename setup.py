@@ -6,7 +6,7 @@ def readme():
         return f.read()
 
 setup(name='pylend',
-      version='0.0.4',
+      version='0.1.0',
       description='A Python library for interacting with the LendingClub REST API',
       long_description=readme(),
       classifiers=[

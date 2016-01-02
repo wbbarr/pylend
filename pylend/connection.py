@@ -14,7 +14,7 @@ class Connection:
     __logger = None
     __request_delay = None
     __JSON_CONTENT_TYPE = 'application/json'
-    __PYLEND_USER_AGENT = 'pylend v0.0.1'
+    __PYLEND_USER_AGENT = 'pylend v0.1.0'
     __LENDINGCLUB_BASE_URI = 'https://api.lendingclub.com/api/investor/{0}/{1}'
 
     def __init__(self, api_key, request_delay=timedelta(seconds=1.0)):
