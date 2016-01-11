@@ -90,3 +90,14 @@ class ConnectionTest(TestCase):
     def passing_None_for_api_key_raises_exception_test(self):
         with self.assertRaises(ValueError):
             Connection(api_key=None)
+
+    @patch('requests.post')
+    def ok_post_raises_no_exception_test(
+            self,
+            requests_post_patch):
+
+        response = MockResponse('foo', 200, '')
+        requests_post_patch.return_value = response
+        c = Connection(api_key="testkey")
+
+        c.post("foo", "bar")

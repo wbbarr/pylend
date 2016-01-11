@@ -94,17 +94,36 @@ class Account:
         return json_payload['myPortfolios'] \
             if 'myPortfolios' in json_payload else []
 
+    def create_portfolio(self, name, description=None):
+        if name is None or name == '':
+            raise ValueError('name must be a non-None, non-empty string')
+        body = {'aid': self.__account_id, 'portfolioName': name}
+        if description is not None:
+            body['portfolioDescription'] = description
+        response = self._account_resource_post('portfolios', body)
+        return response
+
     def _check_for_errors(self, json_payload):
         if 'errors' in json_payload:
             self.__logger.error('Account resource request has errors: {0}'
                                 .format(json_payload['errors']))
-            raise ExecutionFailureException()
+            raise ExecutionFailureException(json_payload['errors'])
 
-    def _account_resource_get(self, resource):
+    def _account_resource_request(self, resource, request_func, body=None):
         api_path = self.__ACCOUNT_API_ROOT.format(self.__account_id, resource)
-
-        json_payload = self.__connection.get(api_path)
+        json_payload = request_func(api_path, body)
         self.__logger.debug('Response: {0}'.format(json_payload))
-
         self._check_for_errors(json_payload)
         return json_payload
+
+    def _account_resource_get(self, resource):
+        def request_func(path, body):
+            return self.__connection.get(path)
+
+        return self._account_resource_request(resource, request_func)
+
+    def _account_resource_post(self, resource, body):
+        def request_func(path, body):
+            return self.__connection.post(path, body)
+
+        return self._account_resource_request(resource, request_func, body)

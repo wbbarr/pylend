@@ -8,7 +8,9 @@ class ResourceNotFoundException(Exception):
 
 
 class ExecutionFailureException(Exception):
-    pass
+
+    def __init__(self, errors=None):
+        self.errors = errors
 
 
 class UnexpectedStatusCodeException(Exception):

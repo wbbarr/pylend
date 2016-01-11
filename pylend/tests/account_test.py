@@ -216,6 +216,13 @@ class PortfoliosTest(TestCase):
 }
     """
 
+    __SINGLE_PORTFOLIO = """
+    {
+        "portfolioId":22222,
+        "portfolioName":"Portfolio2",
+        "portfolioDescription":null
+    }"""
+
     def valid_result_raises_no_exceptions_test(self):
         def callback(resource, api_version, query_params):
             return json.loads(self.__VALID_RESULT)

@@ -1,6 +1,7 @@
 import time
 import requests
 import logging
+import json
 from datetime import datetime, timedelta
 from .exceptions import (AuthorizationException,
                          ResourceNotFoundException,
@@ -26,6 +27,18 @@ class Connection:
         self.__logger = logging.getLogger('pylend')
 
     def get(self, resource, api_version='v1', query_params=None):
+        def request_func(request_uri, headers, params, data, logger):
+            logger.info('Issuing GET request')
+            return requests.get(request_uri, headers=headers, params=params)
+
+        return self._request(request_func, resource, api_version, query_params)
+
+    def _request(self,
+                 request_func,
+                 resource,
+                 api_version,
+                 query_params,
+                 data=None):
         headers = {
             'Accept': self.__JSON_CONTENT_TYPE,
             'Authorization': self.__api_key,
@@ -34,13 +47,35 @@ class Connection:
 
         request_uri = self.__LENDINGCLUB_BASE_URI.format(api_version, resource)
         self._delay_if_necessary()
-        response = requests.get(request_uri,
-                                headers=headers,
-                                params=query_params)
+
+        response = request_func(request_uri,
+                                headers,
+                                query_params,
+                                data,
+                                self.__logger)
+
         self.__last_request = datetime.now()
-        self.__logger.info('URI for get request: {0}'.format(response.url))
+        self.__logger.info('URI for request: {0}'.format(response.url))
+        self.__logger.debug('Body of request: {0}'.format(json.dumps(data)))
         self._check_for_errors(response)
         return response.json()
+
+    def post(self, resource, body, api_version='v1', query_params=None):
+        def request_func(request_uri, headers, params, data, logger):
+            logger.info('Issuing POST request')
+            headers['Content-type'] = 'application/json'
+            return requests.post(
+                request_uri,
+                data=json.dumps(data),
+                headers=headers,
+                params=params)
+
+        return self._request(
+            request_func,
+            resource,
+            api_version,
+            query_params,
+            body)
 
     def _delay_if_necessary(self):
         delta = datetime.now() - self.__last_request
