@@ -103,6 +103,15 @@ class Account:
         response = self._account_resource_post('portfolios', body)
         return response
 
+    def submit_orders(self, orders):
+        if orders is None or len(orders) == 0:
+            raise ValueError(
+                'orders must be non-None and contain at least one LoanOrder')
+        self.__logger.info('Investing in {0} notes'.format(len(orders)))
+        body = {'aid': self.__account_id}
+        body['orders'] = [order.get_dict() for order in orders]
+        return self._account_resource_post('orders', body)
+
     def _check_for_errors(self, json_payload):
         if 'errors' in json_payload:
             self.__logger.error('Account resource request has errors: {0}'
